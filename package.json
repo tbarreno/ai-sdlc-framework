@@ -1,0 +1,51 @@
+{
+  "name": "@tbarreno/ai-sdlc-framework",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Simple Spec-Driven Development framework for AI agents.",
+  "homepage": "https://github.com/tbarreno/ai-sdlc-framework#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tbarreno/ai-sdlc-framework.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tbarreno/ai-sdlc-framework/issues"
+  },
+  "author": {
+    "name": "Tinguaro Barreno"
+  },
+  "bin": {
+    "ai-sdlc": "bin/cli.js"
+  },
+  "scripts": {
+    "start": "node ./bin/cli.js"
+  },
+  "keywords": [
+    "ai",
+    "sdlc",
+    "cursor",
+    "claude",
+    "spec-driven-development",
+    "prompt-engineering",
+    "agents"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "bin/",
+    "files/",
+    "templates/",
+    "docs/config.yaml",
+    "LICENSE.txt"
+  ],
+  "dependencies": {
+    "@clack/prompts": "^0.7.0",
+    "fs-extra": "^11.2.0",
+    "picocolors": "^1.0.0"
+  }
+}

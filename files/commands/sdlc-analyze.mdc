@@ -1,0 +1,51 @@
+---
+name: sdlc-analyze
+description: Analyze a new user request (Feature, Bug, or Experiment) with auto-generated or manual ID prefixing
+globs: "docs/**/*"
+---
+
+# Command: /sdlc-analyze
+
+## Instructions
+
+1. **Read Configuration**:
+   - Read `docs/config.yaml` to determine:
+      - Target language (`language.code`) and directory paths.
+      - User explanation (`language.user_explanations`) and documentation style(`language.documentation_style`)
+
+2. **Classify & Identify Request**:
+   - Ask the user to select the item type:
+     - `1`: Feature (`FEAT`) -> Target folder: `docs/features/`
+     - `2`: Bug (`BUG`) -> Target folder: `docs/bugs/`
+     - `3`: Experiment (`EXP`) -> Target folder: `docs/experiments/`
+   - Ask the user for a **Title / Short Description** (e.g., `user authentication` or `date endpoint`).
+   - Ask the user if they want to specify a **custom ID** (e.g., `FEAT-105` or `JIRA-402`).
+
+3. **Calculate ID & File Path**:
+   - **Custom ID provided**: Use the user's ID directly.
+   - **No custom ID provided (Default Auto-Increment)**:
+     - Scan the target folder for existing files matching the prefix (e.g., `FEAT-*.md`).
+     - Extract the highest numeric value (e.g., if `FEAT-004-*.md` exists, next number is `5`).
+     - Format as a 3-digit padded number (e.g., `FEAT-005`).
+   - **Construct Filename**: Convert short title to kebab-case and join with the ID:
+     - Format: `<target-folder>/<ID>-<kebab-title>.md`
+     - Examples: `docs/features/FEAT-005-date-endpoint.md`, `docs/bugs/BUG-002-session-leak.md`
+
+4. **Create Document**:
+   - Instantiate the appropriate template from `templates/` (feature, bug, or experiment).
+   - Set YAML Frontmatter:
+     - `id`: `<Calculated-ID>`
+     - `status`: `definition`
+     - `created_at`: Current date (`YYYY-MM-DD`)
+     - `updated_at`: Current date (`YYYY-MM-DD`)
+   - Fill in requirements, user story, or reproduction steps based on user input.
+
+5. **Update History Log**:
+   - Append entry to `docs/history.md`:
+     `| <Timestamp> | <Type> | <ID> - <Title> | definition | <file-path> |`
+
+6. **User Output**:
+   - Present a concise, user-friendly summary of the created analysis file in the user's preferred language (respect `language.user_explanations`).
+7. **Optional — Close analysis**:
+   - Ask whether analysis is complete (e.g. *«¿Damos el análisis por cerrado?»*).
+   - If the user confirms, apply `/sdlc-close-analysis` for the new spec file (transition to `ready-for-design`).

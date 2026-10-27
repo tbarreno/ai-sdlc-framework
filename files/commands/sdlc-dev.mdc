@@ -1,0 +1,23 @@
+---
+name: sdlc-dev
+description: Execute tasks from a spec file and implement code + tests
+globs: "*"
+---
+
+# Command: /sdlc-dev <spec-file-path>
+
+## Instructions
+
+1. Read target spec file and verify Frontmatter `status` is `in-progress`.
+   - If status is `ready-for-implementation`, tell the user to run `/sdlc-plan` first to assign the spec to a release and set `in-progress`.
+2. Locate the first uncompleted task `[ ]` in the spec.
+3. Implement code modifications and write matching unit/integration tests.
+4. Run tests to ensure zero regressions.
+5. Mark the task as completed `[x]` in the spec file.
+6. Repeat steps 2–5 until all tasks are completed or the user pauses execution.
+7. **When all tasks and the verification checklist are complete** (`[x]`):
+   - Set Frontmatter `status` to `ready-for-release`.
+   - Set `updated_at` to current date (`YYYY-MM-DD`).
+   - Append entry to `docs/history.md`:
+     `| <Timestamp> | <Type> | <ID> - Development complete | ready-for-release | <file-path> |`
+8. If work is paused with open tasks, leave status as `in-progress` and log progress in `docs/history.md` if significant.

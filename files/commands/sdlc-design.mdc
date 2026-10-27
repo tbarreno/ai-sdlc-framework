@@ -1,0 +1,25 @@
+---
+name: sdlc-design
+description: Perform component design and update system architecture
+globs: "docs/**/*"
+---
+
+# Command: /sdlc-design <spec-file-path>
+
+## Instructions
+
+1. **Read Configuration**: 
+   - Read `docs/config.yaml` to extract language settings and paths (`paths.components_dir`, `paths.architecture_file`).
+2. Read the specified spec file (e.g., `docs/features/FEAT-001-user-auth.md`) and verify its status is `ready-for-design`.
+   - If status is `definition`, ask the user to run `/sdlc-close-analysis` first.
+3. Identify affected components and interface changes (APIs, DTOs, auth rules).
+4. If a new component is needed:
+   - Create `docs/components/<component-name>.md` using `templates/component-architecture.md`.
+5. If an existing component changes:
+   - Update `docs/components/<component-name>.md`.
+6. If overall system structure changes:
+   - Update `docs/architecture.md`.
+7. Update the spec’s architecture / component impact sections to match the design.
+8. Ask whether design is complete:
+   - If **yes**, apply `/sdlc-close-design` (set `status` to `ready-for-implementation`, update `updated_at`, log in `docs/history.md`).
+   - If **no**, leave status at `ready-for-design` and summarize remaining design work.

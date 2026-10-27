@@ -1,0 +1,4 @@
+# Allowlist is defined in package.json "files"; this excludes extras if present.
+node_modules/
+*.tgz
+workspace.md

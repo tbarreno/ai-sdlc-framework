@@ -1,0 +1,50 @@
+---
+name: sdlc-status
+description: Scan all specs and generate a Kanban-style status board (table) for features, bugs, and experiments
+globs: "docs/**/*"
+---
+
+# Command: /sdlc-status
+
+## Instructions
+
+1. **Read Configuration**:
+   - Read `docs/config.yaml` for `language.code`, `language.user_explanations`, and paths:
+     - `paths.features_dir`, `paths.bugs_dir`, `paths.experiments_dir`
+     - `paths.status_board_file` if set; otherwise default **`docs/status-board.md`**.
+
+2. **Collect specs**:
+   - List all `*.md` files in the three spec directories (ignore `README.md` if present).
+   - For each file, read YAML frontmatter (`id`, `title`, `status`, `type`, `updated_at`, `severity` for bugs).
+   - If frontmatter is missing or invalid, include the item in an **⚠ Needs attention** section with the file path.
+
+3. **Normalize status**:
+   - Expected Kanban values: `definition`, `ready-for-design`, `ready-for-implementation`, `in-progress`, `ready-for-release`, `released`.
+   - Experiments may also use terminal **`rejected`**.
+   - Any other value → list under **⚠ Unknown status** (suggest a valid transition).
+
+4. **Optional task progress** (for specs in `in-progress` or `ready-for-release`):
+   - Count checklist items `[ ]` vs `[x]` under `## Task Breakdown` and `## Verification` sections when present.
+   - Show as e.g. `3/5 tasks` in the board table.
+
+5. **Write or update `docs/status-board.md`** using this structure:
+
+   - YAML frontmatter: `type: status-board`, `generated_at` (ISO timestamp), `spec_count`.
+   - **Summary**: total counts per status (one line or small table).
+   - **Kanban columns**: one subsection per status (in lifecycle order), each with a markdown table:
+
+     | ID | Type | Title | Tasks | Updated | File |
+     | :--- | :--- | :--- | :--- | :--- | :--- |
+
+   - Empty columns: show _No items_.
+   - **`rejected`** and **⚠** sections after the main columns.
+
+6. **User output**:
+   - Present a short summary in the user's language (`language.user_explanations`): totals by column and anything blocked (unknown status, missing frontmatter).
+   - Mention that the full board is in `docs/status-board.md` (or the configured path).
+
+7. **Do not** change spec statuses or `docs/history.md` (read-only command).
+
+## Agent shortcut
+
+When the user asks for "project status", "Kanban", "what's in progress", or similar, run these steps even if `/sdlc-status` was not typed.

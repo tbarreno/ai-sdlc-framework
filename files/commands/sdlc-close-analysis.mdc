@@ -1,0 +1,30 @@
+---
+name: sdlc-close-analysis
+description: Close the analysis phase and promote a spec from definition to ready-for-design
+globs: "docs/**/*"
+---
+
+# Command: /sdlc-close-analysis <spec-file-path>
+
+## Instructions
+
+1. **Read Configuration**:
+   - Read `docs/config.yaml` for paths and `language.user_explanations`.
+2. Read the target spec file and verify Frontmatter `status` is `definition`.
+   - If status is not `definition`, explain the current status and stop (or suggest the appropriate next command).
+3. **Validate analysis completeness** (adapt to spec `type`: feature, bug, experiment):
+   - Feature: user story, functional requirements, and scope are filled in.
+   - Bug: problem description, reproduction steps, and expected vs observed behavior are filled in.
+   - Experiment: goal, hypothesis, and options evaluated are documented.
+4. Ask the user to confirm analysis is complete (e.g. *«¿Damos el análisis por cerrado?»* / *«Shall we close the analysis?»*).
+   - If the user declines, stop without changing status.
+5. On confirmation:
+   - Set Frontmatter `status` to `ready-for-design`.
+   - Set `updated_at` to current date (`YYYY-MM-DD`).
+6. Append entry to `docs/history.md`:
+   `| <Timestamp> | <Type> | <ID> - Analysis closed | ready-for-design | <file-path> |`
+7. Summarize next step: run `/sdlc-design <spec-file-path>` when ready.
+
+## Agent shortcut (without explicit slash command)
+
+When the user explicitly confirms that analysis is finished during `/sdlc-analyze` or follow-up chat, apply steps 3–7 above even if `/sdlc-close-analysis` was not typed.

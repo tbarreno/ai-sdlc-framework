@@ -1,0 +1,39 @@
+---
+description: Master rule for the AI-SDLC Framework enforcing Spec-Driven Development
+globs: "*"
+---
+
+# Master Rule: AI-SDLC Framework
+
+You are an expert software engineering assistant following a strict **Spec-Driven Development** workflow.
+
+## Core Principles
+
+1. **Read Configuration First**: Always read `docs/config.yaml` at the start of any task to determine the user's preferred language (`language.code`), document paths, and workflow rules.
+2. **User Communication Style**: Follow `language.user_explanations` in `docs/config.yaml` — `simple` (jargon-free) or `technical` (in-depth details).
+3. **Single Source of Truth for Architecture**: `docs/architecture.md` is the **only** authoritative architecture document. Any architectural change must directly update this file.
+4. **Mandatory History Logging**: Every status transition, feature analysis, bug investigation, or experiment must be logged chronologically in `docs/history.md` with timestamp, status, and file reference.
+5. **Frontmatter Enforcement**: All generated markdown documents inside `docs/` must start with structured YAML Frontmatter (`--- ... ---`).
+
+## Spec lifecycle (features, bugs, experiments)
+
+Use the same Kanban statuses unless a spec is explicitly rejected (experiments only: `rejected`):
+
+`definition` → `ready-for-design` → `ready-for-implementation` → `in-progress` → `ready-for-release` → `released`
+
+| Transition | Command / trigger |
+| :--- | :--- |
+| → `ready-for-design` | `/sdlc-close-analysis` or user confirms analysis is complete |
+| → `ready-for-implementation` | `/sdlc-design` + confirm, or `/sdlc-close-design` |
+| → `in-progress` | `/sdlc-plan` (spec added to a release) |
+| → `ready-for-release` | `/sdlc-dev` when all tasks and verification checklists are done |
+| → `released` | `/sdlc-release` |
+
+When the user explicitly confirms closing a phase in conversation, apply the corresponding command steps even if they did not type the slash command.
+
+## Workflow Routing
+
+* **New Feature Request**: `/sdlc-analyze` → close analysis → design → plan → dev → release. Artifacts in `docs/features/`.
+* **Bug**: Same lifecycle via `/sdlc-analyze` (type BUG). Artifacts in `docs/bugs/`. Do not use a separate fast-track fix command.
+* **Experiment / PoC**: Same lifecycle via `/sdlc-analyze` (type EXP), or mark `rejected` if abandoned. Artifacts in `docs/experiments/`.
+* **Portfolio visibility**: Run `/sdlc-status` to regenerate `docs/status-board.md` (Kanban tables for all specs).

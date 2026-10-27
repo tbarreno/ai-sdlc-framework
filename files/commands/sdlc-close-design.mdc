@@ -1,0 +1,30 @@
+---
+name: sdlc-close-design
+description: Close the design phase and promote a spec from ready-for-design to ready-for-implementation
+globs: "docs/**/*"
+---
+
+# Command: /sdlc-close-design <spec-file-path>
+
+## Instructions
+
+1. **Read Configuration**:
+   - Read `docs/config.yaml` for paths (`paths.components_dir`, `paths.architecture_file`) and language settings.
+2. Read the target spec file and verify Frontmatter `status` is `ready-for-design`.
+   - If status is not `ready-for-design`, explain the current status and stop (or suggest `/sdlc-close-analysis` or `/sdlc-design`).
+3. **Validate design completeness**:
+   - Affected components are documented or updated under `docs/components/`.
+   - Any required changes to `docs/architecture.md` are applied.
+   - The spec’s architecture / component impact section reflects the design decisions.
+4. Ask the user to confirm design is complete.
+   - If the user declines, stop without changing status.
+5. On confirmation:
+   - Set Frontmatter `status` to `ready-for-implementation`.
+   - Set `updated_at` to current date (`YYYY-MM-DD`).
+6. Append entry to `docs/history.md`:
+   `| <Timestamp> | <Type> | <ID> - Design closed | ready-for-implementation | <file-path> |`
+7. Summarize next step: include the spec in a release plan with `/sdlc-plan`.
+
+## Agent shortcut (without explicit slash command)
+
+When the user explicitly confirms that design is finished after `/sdlc-design` or related work, apply steps 3–7 above even if `/sdlc-close-design` was not typed.

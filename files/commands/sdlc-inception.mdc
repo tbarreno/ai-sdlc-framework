@@ -1,0 +1,21 @@
+---
+name: sdlc-inception
+description: Run initial project setup for new or existing codebases; generate README, inception record, and base architecture
+globs: "*"
+---
+
+# Command: /sdlc-inception
+
+## Instructions
+
+1. **Read Configuration**:
+   - Read `docs/config.yaml` for `language.code`, `language.user_explanations`, and paths (especially `paths.architecture_file`, `paths.inception_file` if defined; default inception path: `docs/inception.md`).
+2. **Detect context** (no user question about “greenfield” vs “brownfield”):
+   - **Existing codebase**: Substantial source, manifests (`package.json`, `pyproject.toml`, etc.), or clear module layout → scan structure, entry points, and dependencies to infer architecture.
+   - **New / minimal repo**: Little or no application code → ask the user for purpose, audience, stack choices, and license.
+3. **Create or update `docs/inception.md`** using `templates/inception.md` (YAML frontmatter + inception sections). Set `language` in frontmatter from config.
+4. **Create or update `README.md`** using `templates/readme.md` (project-facing overview, getting started, doc links — not the inception template).
+5. **Create or update `docs/architecture.md`** using `templates/architecture.md` with a system overview aligned with inception and codebase scan.
+6. Create or update component specs in `docs/components/` for identified core modules (`templates/component-architecture.md`).
+7. Append entry to `docs/history.md`:
+   `| <Timestamp> | Inception | Project Setup | Completed | docs/inception.md |`

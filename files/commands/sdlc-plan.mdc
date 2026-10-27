@@ -1,0 +1,18 @@
+---
+name: sdlc-plan
+description: Plan a target release and break down designed specs into actionable tasks
+globs: "docs/**/*"
+---
+
+# Command: /sdlc-plan
+
+## Instructions
+1. Prompt user for the target Release Version (e.g., `v1.0.0`).
+2. Check if `docs/releases/<version>.md` exists. If not, create it using `templates/release.md`.
+3. Scan `docs/features/`, `docs/bugs/`, and `docs/experiments/` for specs with status `ready-for-implementation`.
+4. Present the list of candidate specs to the user and ask which items should be included in this release.
+5. For each selected spec:
+   - Add entry to the table in `docs/releases/<version>.md`.
+   - Update spec status Frontmatter to `in-progress`.
+   - Generate an ordered, actionable task list under `## Task Breakdown` inside the spec file.
+6. Update `docs/history.md`.

@@ -1,0 +1,21 @@
+---
+name: sdlc-release
+description: Finalize a target release, verify item statuses, and promote items to released status
+globs: "docs/**/*"
+---
+
+# Command: /sdlc-release <version>
+
+## Instructions
+1. Locate `docs/releases/<version>.md` (e.g., `docs/releases/v1.0.0.md`).
+2. Read all specs listed in the release table (features, bugs, experiments).
+3. Verify that all listed specs have status `ready-for-release`. If any spec is not ready, warn the user.
+4. For every listed spec:
+   - Update Frontmatter status to `released`.
+   - Update the status column in `docs/releases/<version>.md` to `released`.
+5. Update release file Frontmatter:
+   - Set `status: released`.
+   - Set `released_at: <current-date>`.
+6. Log official release publication in `docs/history.md`:
+   `| <Timestamp> | Release | <version> Published | Released | docs/releases/<version>.md |`
+7. Provide a concise, user-friendly summary of the published release.

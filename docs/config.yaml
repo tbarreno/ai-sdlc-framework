@@ -1,0 +1,62 @@
+# ==============================================================================
+# AI-SDLC Framework Configuration
+# Single source of methodology configuration for developers and AI agents
+# ==============================================================================
+
+# Methodology schema version (not the npm package semver). Bump when docs/config.yaml structure or SDLC phases change.
+version: "1.1.0"
+
+# --- Language & Communication ---
+language:
+  code: "en"                       # Default project language (en, es, fr, pt, etc.)
+  user_explanations: "simple"      # "simple" (jargon-free) or "technical"
+  documentation_style: "clear"     # "clear", "verbose", or "concise"
+
+# --- Directory & File Paths ---
+paths:
+  base_docs: "docs"
+  architecture_file: "docs/architecture.md"
+  history_file: "docs/history.md"
+  inception_file: "docs/inception.md"
+  components_dir: "docs/components"
+  features_dir: "docs/features"
+  bugs_dir: "docs/bugs"
+  experiments_dir: "docs/experiments"
+  releases_dir: "docs/releases"
+  status_board_file: "docs/status-board.md"
+  templates_dir: "templates"
+
+# --- Target AI platforms (ai-sdlc update syncs rules/commands for these) ---
+platforms:
+  - cursor
+
+# --- Agent Execution Rules ---
+rules:
+  auto_update_history: true        # Forces agents to log task start/completion in history.md
+  single_architecture_source: true # Guarantees architecture.md remains the single source of truth
+  require_frontmatter: true        # Enforces YAML frontmatter on all created documents
+  mode: "spec-driven"              # "spec-driven" (specification first, then code)
+
+# --- Software Development Life Cycle Phases ---
+phases:
+  - id: 0
+    name: "Inception"
+    description: "Initial project setup, README.md generation, scope definition, and constraints."
+  - id: 1
+    name: "Requirements Analysis"
+    description: "Requirements breakdown for new features, bug investigations, or experiments."
+  - id: 2
+    name: "Architecture & Component Design"
+    description: "Technical design, contracts, DTOs, and updates to system architecture."
+  - id: 3
+    name: "Release Planning & Task Breakdown"
+    description: "Assigning items to target releases and breaking specs down into actionable tasks."
+  - id: 4
+    name: "Development & Testing"
+    description: "Code implementation and automated test suites."
+  - id: 5
+    name: "Deployment & Release"
+    description: "Packaging completed specs into official release notes and promoting to released status."
+  - id: 6
+    name: "Maintenance & Bugfixing"
+    description: "New bugs and fixes use the same spec lifecycle as features (/sdlc-analyze with type BUG, then design, plan, dev, release). Use /sdlc-status for a portfolio Kanban view."
