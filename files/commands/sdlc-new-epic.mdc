@@ -1,0 +1,37 @@
+---
+name: sdlc-new-epic
+description: Create an optional product-level Epic (PO view) with user stories and acceptance criteria
+globs: "docs/**/*"
+---
+
+# Command: /sdlc-new-epic
+
+## Instructions
+
+Epics are **optional**. Teams may still create features, bugs, or experiments directly with `/sdlc-analyze` without an epic (existing PO tools outside the framework are supported).
+
+1. **Read Configuration**:
+   - Read `docs/config.yaml` for language settings and `paths.epics_dir` (default `docs/epics/`).
+
+2. **Identify the epic**:
+   - Ask for **Epic title** (short, product-oriented).
+   - Ask for optional **custom ID** (e.g. `EPIC-105`). Otherwise auto-increment `EPIC-NNN` from existing files in `paths.epics_dir`.
+
+3. **Collect product content** (interactive; respect `language.user_explanations`):
+   - **Vision / description** (why this initiative exists).
+   - **Outcomes** (what changes for users or the business).
+   - **In scope / out of scope** (brief).
+   - **User stories**: one or more entries in *As a [role], I want [goal] so that [value]* form.
+   - **Epic-level acceptance criteria**: bullet list (product checks, not implementation tasks).
+
+4. **Create the document**:
+   - Path: `docs/epics/<ID>-<kebab-title>.md`
+   - Use `templates/epic.md`.
+   - Frontmatter: `type: epic`, `status: draft`, `created_at` / `updated_at`.
+   - User story table: assign `US-01`, `US-02`, … with `coverage: pending` and empty `Linked features`.
+   - Acceptance criteria as `- [ ]` checklist under **Epic acceptance criteria**.
+
+5. **Suggest next step** (do not force): `/sdlc-analyze-epic <epic-file>` to propose technical feature specs, or leave the epic in `draft` until the PO is ready.
+
+6. **History**: append to `docs/history.md`:
+   `| <Timestamp> | Epic | <ID> - <Title> | draft | <file-path> |`

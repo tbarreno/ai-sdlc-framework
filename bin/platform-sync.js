@@ -142,7 +142,7 @@ async function syncGemini(projectRoot, bundle) {
 
 Project instructions for Gemini CLI are maintained in the repository root **\`GEMINI.md\`** (managed block between \`${MARKER_START}\` markers).
 
-- Reload context: \`/memory reload\` in Gemini CLI after \`ai-sdlc update\`.
+- Reload context: \`/memory reload\` in Gemini CLI after \`ai-sdlc update\` or \`ai-sdlc platforms\`.
 - Optional: add \`GEMINI.md\` to \`context.fileName\` in Gemini settings if you use a custom context filename.
 `,
     "utf-8",
@@ -194,6 +194,101 @@ ChatGPT Projects do not read local folders automatically. Copy the contents of \
 `,
     "utf-8",
   );
+}
+
+async function stripMarkedSection(filePath) {
+  if (!(await fs.pathExists(filePath))) return;
+  let existing = await fs.readFile(filePath, "utf-8");
+  const pattern = new RegExp(
+    `\\n?${MARKER_START.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}[\\s\\S]*?${MARKER_END.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\n?`,
+  );
+  if (!pattern.test(existing)) return;
+  existing = existing.replace(pattern, "").replace(/\n{3,}/g, "\n\n").trimEnd();
+  const bare = existing.trim();
+  if (!bare || bare === "# AI-SDLC Framework") {
+    await fs.remove(filePath);
+  } else {
+    await fs.writeFile(filePath, `${existing}\n`, "utf-8");
+  }
+}
+
+async function removeDirIfEmpty(dirPath) {
+  if (!(await fs.pathExists(dirPath))) return;
+  const entries = await fs.readdir(dirPath);
+  if (entries.length === 0) await fs.remove(dirPath);
+}
+
+async function removeCursorArtifacts(projectRoot) {
+  await removeLegacySdlcArtifacts(path.join(projectRoot, ".cursor", "rules"));
+  await removeLegacySdlcArtifacts(path.join(projectRoot, ".cursor", "commands"));
+}
+
+async function removeClaudeArtifacts(projectRoot) {
+  await removeLegacySdlcArtifacts(path.join(projectRoot, ".claude", "rules"));
+  await removeLegacySdlcArtifacts(path.join(projectRoot, ".claude", "commands"));
+}
+
+async function removeGeminiArtifacts(projectRoot) {
+  await stripMarkedSection(path.join(projectRoot, "GEMINI.md"));
+
+  const geminiMetaDir = path.join(projectRoot, ".gemini");
+  const readme = path.join(geminiMetaDir, "README.md");
+  if (await fs.pathExists(readme)) {
+    const text = await fs.readFile(readme, "utf-8");
+    if (text.includes("AI-SDLC")) await fs.remove(readme);
+  }
+
+  const legacy = (await fs.readdir(geminiMetaDir).catch(() => [])).filter((n) =>
+    n.endsWith(".mdc"),
+  );
+  for (const name of legacy) {
+    await fs.remove(path.join(geminiMetaDir, name));
+  }
+
+  await removeDirIfEmpty(geminiMetaDir);
+}
+
+async function removeOpenAiArtifacts(projectRoot) {
+  await stripMarkedSection(path.join(projectRoot, "AGENTS.md"));
+
+  const openAiDir = path.join(projectRoot, ".openai");
+  if (!(await fs.pathExists(openAiDir))) return;
+
+  const legacy = (await fs.readdir(openAiDir).catch(() => [])).filter((n) =>
+    n.endsWith(".mdc"),
+  );
+  for (const name of legacy) {
+    await fs.remove(path.join(openAiDir, name));
+  }
+
+  await removeLegacySdlcArtifacts(path.join(openAiDir, "commands"));
+  await removeLegacySdlcArtifacts(path.join(openAiDir, "rules"));
+
+  for (const name of ["instructions.md", "README.md"]) {
+    const filePath = path.join(openAiDir, name);
+    if (await fs.pathExists(filePath)) {
+      const text = await fs.readFile(filePath, "utf-8");
+      if (text.includes("AI-SDLC")) await fs.remove(filePath);
+    }
+  }
+
+  await removeDirIfEmpty(path.join(openAiDir, "commands"));
+  await removeDirIfEmpty(path.join(openAiDir, "rules"));
+  await removeDirIfEmpty(openAiDir);
+}
+
+/** Remove AI-SDLC framework files for one platform (not user-authored rules outside sdlc-*). */
+export async function removePlatformArtifacts(projectRoot, platform) {
+  if (platform === "cursor") await removeCursorArtifacts(projectRoot);
+  else if (platform === "claude") await removeClaudeArtifacts(projectRoot);
+  else if (platform === "gemini") await removeGeminiArtifacts(projectRoot);
+  else if (platform === "openai") await removeOpenAiArtifacts(projectRoot);
+}
+
+export async function removePlatformArtifactsForMany(projectRoot, platforms) {
+  for (const platform of platforms) {
+    await removePlatformArtifacts(projectRoot, platform);
+  }
 }
 
 export async function syncPlatformFiles(projectRoot, platforms, packageRoot) {
@@ -259,11 +354,7 @@ export async function readConfiguredPlatformsFromProject(projectRoot) {
   return readConfiguredPlatforms(text);
 }
 
-/** Config `platforms:` first, then filesystem detection. */
+/** Platforms explicitly listed in docs/config.yaml (used by `ai-sdlc update`). */
 export async function resolvePlatformsForUpdate(projectRoot) {
-  const configured = await readConfiguredPlatformsFromProject(projectRoot);
-  if (configured?.length) return configured;
-  const detected = await detectInstalledPlatforms(projectRoot);
-  if (detected.length) return detected;
-  return null;
+  return readConfiguredPlatformsFromProject(projectRoot);
 }

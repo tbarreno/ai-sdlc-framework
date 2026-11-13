@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "description": "Simple Spec-Driven Development framework for AI agents.",
   "homepage": "https://github.com/tbarreno/ai-sdlc-framework#readme",

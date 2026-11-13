@@ -1,0 +1,41 @@
+---
+name: sdlc-epic-status
+description: Product-level status of all Epics — user story coverage and linked feature delivery states
+globs: "docs/**/*"
+---
+
+# Command: /sdlc-epic-status
+
+## Instructions
+
+1. **Read Configuration**:
+   - Read `docs/config.yaml` for `paths.epics_dir`, `paths.features_dir`, and `paths.epics_board_file` (default **`docs/epics-board.md`**).
+
+2. **Collect epics**:
+   - List `*.md` in `paths.epics_dir` (skip README).
+   - Read epic frontmatter: `id`, `title`, `status`, `updated_at`.
+   - Parse user story table: `US-*`, coverage, linked feature IDs.
+
+3. **Resolve linked features**:
+   - Scan `paths.features_dir` for specs where frontmatter `epic_id` matches (or IDs listed in epic table).
+   - Read each feature’s `id`, `title`, `status` (Kanban).
+
+4. **Derived signals** (read-only):
+   - Per epic: `mapped_stories / total_stories`, count of linked features, breakdown of feature statuses.
+   - Flag stories `pending` with no planned features when epic `status` is `in-breakdown` or `in-delivery`.
+   - Flag features referencing `epic_id` not found in epic file.
+
+5. **Write `docs/epics-board.md`** (or configured path) using `templates/epics-board.md` structure:
+   - Frontmatter: `generated_at`, `epic_count`.
+   - Summary table by epic status.
+   - One subsection per epic: metadata, user story coverage table, linked features with **spec status**.
+
+6. **User output**:
+   - Short PO-friendly summary (`language.user_explanations`): epics in delivery, unmapped stories, blocked features.
+   - Point to `docs/epics-board.md`.
+
+7. **Do not** mutate epic, feature, or history (read-only).
+
+## Agent shortcut
+
+When the user asks for epic progress, story coverage, or “product view”, run these steps even if `/sdlc-epic-status` was not typed.

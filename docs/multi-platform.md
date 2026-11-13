@@ -1,9 +1,32 @@
 # Multi-platform installation (maintainers)
 
 Canonical sources live under `files/rules/` and `files/commands/` (`.mdc`).  
-`bin/platform-sync.js` maps them to each agent’s expected layout on `init` / `update`.
+`bin/platform-sync.js` maps them to each agent’s expected layout on `init`, `update`, and `platforms`.
 
-**Commands shipped (9):** `sdlc-inception`, `sdlc-analyze`, `sdlc-close-analysis`, `sdlc-design`, `sdlc-close-design`, `sdlc-plan`, `sdlc-dev`, `sdlc-release`, `sdlc-status` (Kanban board → `docs/status-board.md`).
+## CLI commands
+
+| Command | Behavior |
+| :--- | :--- |
+| **`ai-sdlc init`** | Multiselect → writes `platforms:` → `syncPlatformFiles` for selected IDs. |
+| **`ai-sdlc update`** | Reads `platforms:` from `docs/config.yaml` only (via `resolvePlatformsForUpdate`). No disk detection, no Cursor fallback. Errors if the list is empty. Also refreshes `templates/` from the package. |
+| **`ai-sdlc platforms`** | Interactive multiselect; updates `platforms:` with `injectPlatformsIntoConfig`; optional `removePlatformArtifactsForMany`; then `syncPlatformFiles` for the new selection. Warns when `detectInstalledPlatforms` finds targets not listed in config. |
+
+Shared option labels live in `bin/config-platforms.js` → `PLATFORM_CHOICES`.
+
+## Removing a platform safely
+
+`removePlatformArtifacts(projectRoot, platform)` only deletes **framework-owned** content:
+
+| Platform | Removed |
+| :--- | :--- |
+| **cursor** | `sdlc-*` in `.cursor/rules` and `.cursor/commands` |
+| **claude** | `sdlc-*` in `.claude/rules` and `.claude/commands` |
+| **gemini** | Managed block in `GEMINI.md`; `.gemini/README.md` (AI-SDLC); legacy `.mdc` in `.gemini/`; empty dirs |
+| **openai** | Managed block in `AGENTS.md`; AI-SDLC files under `.openai/`; `sdlc-*` under `.openai/commands` and `.openai/rules` |
+
+Non-SDLC rules in `.cursor/` or `.claude/` are kept. Text in `GEMINI.md` / `AGENTS.md` **outside** the HTML comment markers is kept.
+
+**Commands shipped (12):** `sdlc-inception`, `sdlc-new-epic`, `sdlc-analyze-epic`, `sdlc-analyze`, `sdlc-close-analysis`, `sdlc-design`, `sdlc-close-design`, `sdlc-plan`, `sdlc-dev`, `sdlc-release`, `sdlc-status`, `sdlc-epic-status`.
 
 | Platform | Rules / context | Commands / workflows |
 | :--- | :--- | :--- |

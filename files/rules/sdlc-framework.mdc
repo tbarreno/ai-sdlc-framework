@@ -15,6 +15,15 @@ You are an expert software engineering assistant following a strict **Spec-Drive
 4. **Mandatory History Logging**: Every status transition, feature analysis, bug investigation, or experiment must be logged chronologically in `docs/history.md` with timestamp, status, and file reference.
 5. **Frontmatter Enforcement**: All generated markdown documents inside `docs/` must start with structured YAML Frontmatter (`--- ... ---`).
 
+## Epics (optional product layer)
+
+- Epics live in `docs/epics/` and describe **product owner** intent (vision, user stories, epic acceptance criteria). They do **not** replace external PO tools or mandatory process.
+- **Optional:** work may start directly with `/sdlc-analyze` (feature), bugs, or experiments without an epic.
+- Commands: `/sdlc-new-epic` → `/sdlc-analyze-epic` (propose features; 0..n features per user story; confirm before create) → standard spec Kanban on each feature.
+- Epic statuses: `draft` → `ready-for-breakdown` → `in-breakdown` → `in-delivery` → `done` (product lifecycle, separate from feature Kanban).
+- Features linked to an epic use frontmatter `epic_id` and `user_story_ids`.
+- Visibility: `/sdlc-epic-status` or `/sdlc-status` (also refreshes `docs/epics-board.md`).
+
 ## Spec lifecycle (features, bugs, experiments)
 
 Use the same Kanban statuses unless a spec is explicitly rejected (experiments only: `rejected`):
@@ -33,7 +42,8 @@ When the user explicitly confirms closing a phase in conversation, apply the cor
 
 ## Workflow Routing
 
-* **New Feature Request**: `/sdlc-analyze` → close analysis → design → plan → dev → release. Artifacts in `docs/features/`.
-* **Bug**: Same lifecycle via `/sdlc-analyze` (type BUG). Artifacts in `docs/bugs/`. Do not use a separate fast-track fix command.
+* **Epic (optional)**: `/sdlc-new-epic` → `/sdlc-analyze-epic` → per-feature `/sdlc-close-analysis` … → `/sdlc-release`.
+* **New Feature Request (standalone)**: `/sdlc-analyze` → close analysis → design → plan → dev → release. Artifacts in `docs/features/`.
+* **Bug**: Same lifecycle via `/sdlc-analyze` (type BUG). Artifacts in `docs/bugs/`.
 * **Experiment / PoC**: Same lifecycle via `/sdlc-analyze` (type EXP), or mark `rejected` if abandoned. Artifacts in `docs/experiments/`.
-* **Portfolio visibility**: Run `/sdlc-status` to regenerate `docs/status-board.md` (Kanban tables for all specs).
+* **Portfolio visibility**: `/sdlc-status` → `docs/status-board.md` (+ `docs/epics-board.md` when epics exist); `/sdlc-epic-status` for product view only.

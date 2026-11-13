@@ -5,9 +5,14 @@ import path from "path";
 import { fileURLToPath } from "url";
 import * as p from "@clack/prompts";
 import pc from "picocolors";
-import { injectPlatformsIntoConfig } from "./config-platforms.js";
+import {
+  injectPlatformsIntoConfig,
+  PLATFORM_CHOICES,
+} from "./config-platforms.js";
 import {
   detectInstalledPlatforms,
+  readConfiguredPlatformsFromProject,
+  removePlatformArtifactsForMany,
   resolvePlatformsForUpdate,
   syncPlatformFiles,
 } from "./platform-sync.js";
@@ -26,11 +31,12 @@ ${pc.bold("Usage:")}
   ai-sdlc [init]     Interactive installer (default)
   ai-sdlc init       Same as above
   ai-sdlc update     Refresh rules, commands, and templates (keeps docs/config.yaml & docs/history.md)
+  ai-sdlc platforms  Add or remove AI platforms interactively (optional file cleanup)
   ai-sdlc help       Show this help
 
 ${pc.bold("Notes:")}
   • Target AI platforms are stored in ${pc.dim("docs/config.yaml")} under ${pc.dim("platforms:")}.
-  • Edit that list, then run ${pc.dim("ai-sdlc update")} to sync additional providers.
+  • Use ${pc.dim("ai-sdlc platforms")} to change targets; ${pc.dim("ai-sdlc update")} syncs only platforms listed in config.
 `);
 }
 
@@ -52,6 +58,13 @@ async function writeProjectConfigFromTemplate(
   content = injectPlatformsIntoConfig(content, platforms);
 
   await fs.writeFile(path.join(projectRoot, CONFIG_REL_PATH), content, "utf-8");
+}
+
+async function updateProjectPlatforms(projectRoot, platforms) {
+  const configPath = path.join(projectRoot, CONFIG_REL_PATH);
+  let content = await fs.readFile(configPath, "utf-8");
+  content = injectPlatformsIntoConfig(content, platforms);
+  await fs.writeFile(configPath, content, "utf-8");
 }
 
 async function syncTemplates(projectRoot) {
@@ -108,26 +121,22 @@ async function runUpdate(projectRoot) {
   s.start("Updating framework rules, commands, and templates...");
 
   try {
-    let platforms = await resolvePlatformsForUpdate(projectRoot);
-    let usedFallback = false;
+    const platforms = await resolvePlatformsForUpdate(projectRoot);
 
     if (!platforms?.length) {
-      usedFallback = true;
-      platforms = ["cursor"];
+      s.stop("Update skipped.");
+      p.log.error(
+        pc.red(
+          `No platforms: list in ${CONFIG_REL_PATH}. Run "ai-sdlc platforms" to choose AI targets.`,
+        ),
+      );
+      process.exit(1);
     }
 
     await syncPlatformFiles(projectRoot, platforms, packageRoot);
     await syncTemplates(projectRoot);
 
     s.stop("Framework components updated successfully!");
-
-    if (usedFallback) {
-      p.log.warn(
-        pc.yellow(
-          "No platforms: in docs/config.yaml and none detected on disk. Synced cursor only. Add a platforms: list to config (see ai-sdlc help).",
-        ),
-      );
-    }
 
     p.note(
       `Preserved: ${pc.green("docs/config.yaml")} & ${pc.green("docs/history.md")}\n` +
@@ -155,7 +164,9 @@ async function runInit(projectRoot) {
       ),
     );
     p.log.message(
-      pc.dim('Run "ai-sdlc update" to refresh rules, commands, and templates.'),
+      pc.dim(
+        'Run "ai-sdlc update" to refresh rules, commands, and templates, or "ai-sdlc platforms" to change AI targets.',
+      ),
     );
     process.exit(1);
   }
@@ -196,25 +207,7 @@ async function runInit(projectRoot) {
         p.multiselect({
           message:
             "Select AI platforms / editors you plan to use in this project:",
-          options: [
-            {
-              value: "cursor",
-              label: "Cursor (.cursor/rules + .cursor/commands)",
-              hint: "Recommended",
-            },
-            {
-              value: "claude",
-              label: "Claude Code (.claude/rules + .claude/commands)",
-            },
-            {
-              value: "gemini",
-              label: "Gemini CLI (GEMINI.md + .gemini/)",
-            },
-            {
-              value: "openai",
-              label: "Codex / ChatGPT (AGENTS.md + .openai/)",
-            },
-          ],
+          options: PLATFORM_CHOICES,
           required: true,
         }),
     },
@@ -236,6 +229,7 @@ async function runInit(projectRoot) {
       "docs/features",
       "docs/bugs",
       "docs/experiments",
+      "docs/epics",
       "docs/releases",
       "templates",
     ];
@@ -271,6 +265,102 @@ async function runInit(projectRoot) {
   }
 }
 
+async function runPlatforms(projectRoot) {
+  p.intro(pc.bgMagenta(pc.black(" AI-SDLC — Manage platforms ")));
+
+  const configPath = path.join(projectRoot, CONFIG_REL_PATH);
+  if (!(await fs.pathExists(configPath))) {
+    p.log.error(
+      pc.red(`No ${CONFIG_REL_PATH} found. Please run "ai-sdlc init" first.`),
+    );
+    process.exit(1);
+  }
+
+  const previous =
+    (await readConfiguredPlatformsFromProject(projectRoot)) ?? [];
+  const detected = await detectInstalledPlatforms(projectRoot);
+
+  const onDiskNotInConfig = detected.filter((id) => !previous.includes(id));
+  if (onDiskNotInConfig.length) {
+    p.log.warn(
+      pc.yellow(
+        `Framework files detected on disk but not in config (${onDiskNotInConfig.join(", ")}). ` +
+          "They are not updated by ai-sdlc update until you add them here.",
+      ),
+    );
+  }
+
+  const initialSelection =
+    previous.length > 0 ? previous : detected.length ? detected : ["cursor"];
+
+  const selected = await p.multiselect({
+    message: "Select AI platforms to enable for this project:",
+    options: PLATFORM_CHOICES,
+    initialValues: initialSelection,
+    required: true,
+  });
+
+  if (p.isCancel(selected)) {
+    p.cancel("No changes made.");
+    process.exit(0);
+  }
+
+  const removed = previous.filter((id) => !selected.includes(id));
+  const added = selected.filter((id) => !previous.includes(id));
+
+  let removeFiles = false;
+  if (removed.length) {
+    const removableOnDisk = removed.filter((id) => detected.includes(id));
+    if (removableOnDisk.length) {
+      const confirmRemove = await p.confirm({
+        message: `Remove AI-SDLC framework files for: ${removableOnDisk.join(", ")}?`,
+        initialValue: true,
+      });
+      if (p.isCancel(confirmRemove)) {
+        p.cancel("No changes made.");
+        process.exit(0);
+      }
+      removeFiles = confirmRemove;
+    }
+  }
+
+  const s = p.spinner();
+  s.start("Updating platform configuration...");
+
+  try {
+    await updateProjectPlatforms(projectRoot, selected);
+
+    if (removeFiles) {
+      const toPrune = removed.filter((id) => detected.includes(id));
+      await removePlatformArtifactsForMany(projectRoot, toPrune);
+    }
+
+    await syncPlatformFiles(projectRoot, selected, packageRoot);
+
+    s.stop("Platforms updated.");
+
+    const changes = [];
+    if (added.length) changes.push(`Added: ${added.join(", ")}`);
+    if (removed.length) changes.push(`Removed from config: ${removed.join(", ")}`);
+    if (removeFiles && removed.length) {
+      changes.push(`Files pruned for: ${removed.filter((id) => detected.includes(id)).join(", ") || "—"}`);
+    }
+
+    p.note(
+      `Active platforms: ${pc.cyan(selected.join(", "))}\n` +
+        (changes.length ? `${changes.join("\n")}\n` : "") +
+        `\nRun ${pc.dim("ai-sdlc update")} anytime to refresh rules/commands for platforms in config.`,
+      "Platforms",
+    );
+
+    p.outro(pc.green("Done."));
+  } catch (error) {
+    s.stop("Failed.");
+    p.log.error(pc.red(`Error: ${error.message}`));
+    process.exit(1);
+  }
+}
+
 async function main() {
   if (process.stdout.isTTY) console.clear();
 
@@ -284,6 +374,11 @@ async function main() {
 
   if (command === "update") {
     await runUpdate(process.cwd());
+    return;
+  }
+
+  if (command === "platforms") {
+    await runPlatforms(process.cwd());
     return;
   }
 

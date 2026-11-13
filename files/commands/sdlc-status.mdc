@@ -11,7 +11,8 @@ globs: "docs/**/*"
 1. **Read Configuration**:
    - Read `docs/config.yaml` for `language.code`, `language.user_explanations`, and paths:
      - `paths.features_dir`, `paths.bugs_dir`, `paths.experiments_dir`
-     - `paths.status_board_file` if set; otherwise default **`docs/status-board.md`**.
+     - `paths.status_board_file` if set; otherwise default **`docs/status-board.md`**
+     - `paths.epics_dir`, `paths.epics_board_file` (default **`docs/epics-board.md`**) when epics are used
 
 2. **Collect specs**:
    - List all `*.md` files in the three spec directories (ignore `README.md` if present).
@@ -39,11 +40,15 @@ globs: "docs/**/*"
    - Empty columns: show _No items_.
    - **`rejected`** and **⚠** sections after the main columns.
 
-6. **User output**:
-   - Present a short summary in the user's language (`language.user_explanations`): totals by column and anything blocked (unknown status, missing frontmatter).
-   - Mention that the full board is in `docs/status-board.md` (or the configured path).
+6. **Epics board (second artifact)**:
+   - If `paths.epics_dir` exists and contains epic files, also run the logic of **`/sdlc-epic-status`** and refresh `paths.epics_board_file` (product-level view: story coverage + linked feature statuses).
+   - If there are no epics, skip this step.
 
-7. **Do not** change spec statuses or `docs/history.md` (read-only command).
+7. **User output**:
+   - Present a short summary in the user's language (`language.user_explanations`): totals by column and anything blocked (unknown status, missing frontmatter).
+   - Mention `docs/status-board.md` and, when generated, `docs/epics-board.md`.
+
+8. **Do not** change spec statuses or `docs/history.md` (read-only command).
 
 ## Agent shortcut
 

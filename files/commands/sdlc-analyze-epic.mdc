@@ -1,0 +1,51 @@
+---
+name: sdlc-analyze-epic
+description: Break down an Epic into proposed feature specs (0..n features per user story); create specs after user confirmation
+globs: "docs/**/*"
+---
+
+# Command: /sdlc-analyze-epic <epic-file-path>
+
+## Instructions
+
+1. **Read Configuration**:
+   - Read `docs/config.yaml` for paths (`paths.epics_dir`, `paths.features_dir`, `paths.templates_dir`) and language settings.
+
+2. **Load the epic**:
+   - Read the given epic file (e.g. `docs/epics/EPIC-001-checkout.md`).
+   - Verify `type: epic` in frontmatter.
+
+3. **Review user stories**:
+   - Parse the **User stories** table (`US-*`, coverage, linked features).
+   - Focus on rows with `pending` or `deferred` (ask if `deferred` should be included).
+   - Rule: **one user story → zero to many features** (`0..n`). Not every story needs a feature now.
+
+4. **Propose breakdown** (technical analysis; may use `technical` depth even if epic text is PO-friendly):
+   - For each in-scope user story, propose zero or more **candidate features** (title + one-line technical intent).
+   - Present a consolidated table for user approval:
+
+     | User story | Proposed features (titles) | Notes |
+     | :--- | :--- | :--- |
+
+   - Ask explicitly: *«¿Confirmamos la creación de estas features?»* / *«Shall we create these feature specs?»*
+   - If the user declines or edits, revise the proposal; **do not create files** until confirmed.
+
+5. **On confirmation — create feature specs**:
+   - For each approved feature, follow `/sdlc-analyze` ID rules (`FEAT-NNN`, kebab filename) in `paths.features_dir`.
+   - Instantiate from `templates/feature.md`.
+   - Frontmatter **must** include:
+     - `epic_id: <EPIC-ID>`
+     - `user_story_ids: [<US-IDs>]` (YAML list)
+   - Body: inherit user story text in **User Story & Requirements Analysis**; extend with **technical** functional/non-functional requirements and implementation context (this is the hand-off from PO epic to engineering spec).
+   - Set feature `status: definition`.
+
+6. **Update the epic file**:
+   - For each mapped user story: set `coverage` to `mapped`; fill **Linked features** with comma-separated feature IDs (append if partial mapping).
+   - Set epic `status` to `in-breakdown` if some stories remain `pending`; `in-delivery` if all in-scope stories are `mapped` or `out-of-scope` and at least one feature exists.
+   - Update `updated_at`.
+
+7. **History**: log epic breakdown and each created feature in `docs/history.md`.
+
+8. **Next steps**: suggest `/sdlc-close-analysis` per feature when each spec is ready, or `/sdlc-epic-status` for portfolio view.
+
+**Do not** remove or replace direct `/sdlc-analyze` for standalone features without an epic.

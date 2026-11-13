@@ -14,6 +14,7 @@ globs: "docs/**/*"
       - User explanation (`language.user_explanations`) and documentation style(`language.documentation_style`)
 
 2. **Classify & Identify Request**:
+   - **Epics are optional.** Features may be created standalone (no epic) or from `/sdlc-analyze-epic`. Do not require an epic.
    - Ask the user to select the item type:
      - `1`: Feature (`FEAT`) -> Target folder: `docs/features/`
      - `2`: Bug (`BUG`) -> Target folder: `docs/bugs/`
@@ -38,6 +39,7 @@ globs: "docs/**/*"
      - `status`: `definition`
      - `created_at`: Current date (`YYYY-MM-DD`)
      - `updated_at`: Current date (`YYYY-MM-DD`)
+     - `epic_id` and `user_story_ids`: set only when the user links to an epic; otherwise omit or leave empty
    - Fill in requirements, user story, or reproduction steps based on user input.
 
 5. **Update History Log**:

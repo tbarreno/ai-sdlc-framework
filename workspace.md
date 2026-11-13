@@ -163,6 +163,16 @@ Cada ítem incluye el **problema detectado**, el **estado** y la **instrucción 
 
 ---
 
+## 14. Epics opcionales (capa PO)
+
+| Campo | Detalle |
+|--------|---------|
+| **Estado** | `hecho` |
+| **Instrucción** | `/sdlc-new-epic`, `/sdlc-analyze-epic` (0..n features/US, confirmar antes de crear), `/sdlc-epic-status`; epic opcional; `sdlc-status` también refresca `docs/epics-board.md`. |
+| **Artefactos** | `templates/epic.md`, `templates/epics-board.md`, `paths.epics_dir`, `paths.epics_board_file`, frontmatter `epic_id` / `user_story_ids` en features. |
+
+---
+
 ## 12. Comando `/sdlc-status` (tablero Kanban)
 
 | Campo | Detalle |
@@ -177,8 +187,8 @@ Cada ítem incluye el **problema detectado**, el **estado** y la **instrucción 
 
 | ID | Estado | Problema | Solución acordada |
 | :--- | :--- | :--- | :--- |
-| **11.1** | `hecho` | Subcomandos desconocidos ejecutaban `init` | Solo `init`, `update`, `help` / `-h` / `--help`; resto → error + ayuda |
-| **11.2** | `hecho` | `update` sin detección caía en Cursor silenciosamente | Persistir `platforms:` en `docs/config.yaml`; update lee config → detección → aviso + fallback Cursor |
+| **11.1** | `hecho` | Subcomandos desconocidos ejecutaban `init` | `init`, `update`, `platforms`, `help` / `-h` / `--help`; resto → error + ayuda |
+| **11.2** | `hecho` | `update` sin detección caía en Cursor silenciosamente | `platforms:` en config; **`update` solo lee config** (sin fallback); gestión interactiva en **`ai-sdlc platforms`** con prune opcional |
 | **11.3** | `hecho` | `.mdc` huérfanos en `.cursor/commands/` (instalaciones viejas) | Limpiar `sdlc-*.md` / `sdlc-*.mdc` antes de sincronizar |
 | **11.4** | `hecho` | `update` copiaba todo `templates/` de forma brusca | Copiar solo ficheros del paquete (overwrite por archivo); plantillas extra del usuario se conservan |
 | **11.5** | `hecho` | `console.clear()` falla sin TTY | Limpiar solo si `process.stdout.isTTY` |
@@ -211,6 +221,8 @@ Cada ítem incluye el **problema detectado**, el **estado** y la **instrucción 
 | 2026-10-26 | Ítem **11** (post-revisión): CLI routing, `platforms` en config, limpieza legacy, templates, help, history template. |
 | 2026-10-27 | Ítem **11.9**: `repository`, `homepage`, `bugs` en `package.json`. |
 | 2026-10-27 | Ítem **12** + revisión final: `/sdlc-status` documentado en README, config, multi-platform, plantillas. |
+| 2026-11-13 | Ítem **14**: Epics opcionales, 3 comandos, epics-board, integración con features. |
+| 2026-11-13 | Subcomando **`ai-sdlc platforms`**, `removePlatformArtifacts*`, `update` limitado a `platforms:` en config; documentación README + `multi-platform.md`. |
 
 ---
 

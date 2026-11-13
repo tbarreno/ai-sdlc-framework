@@ -1,6 +1,26 @@
 const PLATFORMS_BLOCK_RE = /^platforms:\s*\n((?:  - .+\n)*)/m;
 const VALID_PLATFORMS = new Set(["cursor", "claude", "gemini", "openai"]);
 
+export const PLATFORM_CHOICES = [
+  {
+    value: "cursor",
+    label: "Cursor (.cursor/rules + .cursor/commands)",
+    hint: "Recommended",
+  },
+  {
+    value: "claude",
+    label: "Claude Code (.claude/rules + .claude/commands)",
+  },
+  {
+    value: "gemini",
+    label: "Gemini CLI (GEMINI.md + .gemini/)",
+  },
+  {
+    value: "openai",
+    label: "Codex / ChatGPT (AGENTS.md + .openai/)",
+  },
+];
+
 export function injectPlatformsIntoConfig(content, platforms) {
   const normalized = platforms.filter((p) => VALID_PLATFORMS.has(p));
   if (normalized.length === 0) {

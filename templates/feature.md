@@ -3,6 +3,8 @@ type: feature
 id: FEAT-001
 title: "[Feature Title]"
 status: definition # definition | ready-for-design | ready-for-implementation | in-progress | ready-for-release | released
+# epic_id: EPIC-001   # optional — omit this line for standalone features
+user_story_ids: []    # optional, e.g. [US-01] when linked to an epic
 created_at: YYYY-MM-DD
 updated_at: YYYY-MM-DD
 author: AI Agent / User

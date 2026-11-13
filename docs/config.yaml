@@ -4,7 +4,7 @@
 # ==============================================================================
 
 # Methodology schema version (not the npm package semver). Bump when docs/config.yaml structure or SDLC phases change.
-version: "1.1.0"
+version: "1.2.0"
 
 # --- Language & Communication ---
 language:
@@ -22,11 +22,16 @@ paths:
   features_dir: "docs/features"
   bugs_dir: "docs/bugs"
   experiments_dir: "docs/experiments"
+  epics_dir: "docs/epics"
   releases_dir: "docs/releases"
   status_board_file: "docs/status-board.md"
+  epics_board_file: "docs/epics-board.md"
   templates_dir: "templates"
 
-# --- Target AI platforms (ai-sdlc update syncs rules/commands for these) ---
+# --- Target AI platforms ---
+# ai-sdlc update syncs rules/commands only for these IDs.
+# ai-sdlc platforms — interactive add/remove (optional file cleanup).
+# Valid: cursor | claude | gemini | openai
 platforms:
   - cursor
 
@@ -44,7 +49,7 @@ phases:
     description: "Initial project setup, README.md generation, scope definition, and constraints."
   - id: 1
     name: "Requirements Analysis"
-    description: "Requirements breakdown for new features, bug investigations, or experiments."
+    description: "Optional epics (PO) via /sdlc-new-epic and /sdlc-analyze-epic; or direct specs via /sdlc-analyze for features, bugs, and experiments."
   - id: 2
     name: "Architecture & Component Design"
     description: "Technical design, contracts, DTOs, and updates to system architecture."

@@ -39,7 +39,9 @@ This project uses the **AI-SDLC** spec-driven workflow:
 | `docs/config.yaml` | Methodology and language settings |
 | `docs/inception.md` | Scope, constraints, and inception record |
 | `docs/architecture.md` | System architecture (single source of truth) |
+| `docs/epics/` | Optional product epics (PO) |
 | `docs/features/`, `docs/bugs/`, `docs/experiments/` | Specs and work items |
+| `docs/epics-board.md` | Epic portfolio (run `/sdlc-epic-status` or `/sdlc-status`) |
 | `docs/status-board.md` | Kanban snapshot (run `/sdlc-status` to refresh) |
 | `docs/history.md` | Change and phase history |
 
